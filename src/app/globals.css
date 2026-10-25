@@ -1,26 +1,59 @@
 @import "tailwindcss";
 
+/* Colors carried over from the prototype. Defined once here so light and dark
+   mode stay in step; Tailwind classes like bg-surface read from these. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #f3f5f4; --surface: #ffffff; --ink: #14211f; --muted: #5b6b68; --line: #d6dedc;
+  --accent: #0f5c55; --accent-soft: #e1efed; --crude: #b4690e;
+  --ok: #2f7d3a; --ok-soft: #e5f3e7; --warn: #a15c00; --warn-soft: #fbefd9; --bad: #b3261e; --bad-soft: #fbe4e2;
 }
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --bg: #0e1514; --surface: #16201f; --ink: #e6eeec; --muted: #93a5a1; --line: #2a3836;
+    --accent: #5cc2b6; --accent-soft: #163633; --crude: #e3a04a;
+    --ok: #74c487; --ok-soft: #173022; --warn: #e8a94a; --warn-soft: #33270f; --bad: #f08a80; --bad-soft: #3a1a18;
+    color-scheme: dark;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-crude: var(--crude);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-bad: var(--bad);
+  --color-bad-soft: var(--bad-soft);
+  --font-display: var(--font-archivo), system-ui, sans-serif;
+  --font-sans: var(--font-source-sans), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
 }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+}
+
+/* Small shared pieces, kept as classes so pages stay readable. */
+@layer components {
+  .panel { @apply bg-surface border border-line rounded-lg p-4 flex flex-col gap-3 min-w-0; }
+  .label { @apply text-xs uppercase tracking-[0.08em] text-muted font-semibold; }
+  .pill { @apply inline-block text-xs font-semibold px-2 py-0.5 rounded-full; }
+  .btn { @apply bg-accent text-surface font-semibold rounded-md px-4 py-2.5 cursor-pointer; }
+  .input { @apply font-mono px-2.5 py-2 border border-line rounded-md bg-bg text-ink w-full; }
+  .data-table { @apply w-full border-collapse text-sm tabular-nums; }
+  .data-table th { @apply text-xs uppercase tracking-[0.06em] text-muted font-semibold text-right px-2.5 py-2 border-b border-line whitespace-nowrap; }
+  .data-table td { @apply text-right px-2.5 py-2 border-b border-line whitespace-nowrap; }
+  .data-table th:first-child, .data-table td:first-child { @apply text-left; }
+}
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
