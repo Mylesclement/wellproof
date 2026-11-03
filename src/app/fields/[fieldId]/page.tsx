@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AppHeader, SampleBanner } from "@/components/AppHeader";
+import { FieldTabs } from "@/components/FieldTabs";
 import { fmtBbl, fmtDay, fmtStamp, todayInField } from "@/lib/format";
 import { getViewer } from "@/lib/viewer";
 import { DayForm } from "./DayForm";
@@ -90,6 +91,7 @@ export default async function FieldPage({
     <main className="max-w-[1080px] mx-auto px-4 pt-5 pb-12 flex flex-col gap-5">
       <AppHeader name={name} org={myOrg} />
       {field.is_sample && <SampleBanner />}
+      <FieldTabs fieldId={field.id} active="readings" />
 
       <section className="flex flex-col gap-4">
         <div>

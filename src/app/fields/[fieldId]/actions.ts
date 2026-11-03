@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { syncFlags } from "@/lib/flags";
 import { planDay } from "@/lib/readings";
 import { createClient } from "@/lib/supabase/server";
 import { todayInField } from "@/lib/format";
@@ -44,7 +45,15 @@ export async function saveDay(fieldId: string, date: string, _prev: SaveResult, 
     return { ok: false, message: error.message, values };
   }
 
-  revalidatePath(`/fields/${fieldId}`);
+  // Readings changed, so recompute flags. The readings are already saved; if
+  // this fails, the next save (or a page that calls sync) catches up.
+  try {
+    await syncFlags(supabase, fieldId);
+  } catch (e) {
+    console.error("flag sync failed", e);
+  }
+
+  revalidatePath(`/fields/${fieldId}`, "layout");
   const n = plan.inserts.length;
   const corrected = plan.inserts.filter((i) => i.supersedes_id).length;
   return {

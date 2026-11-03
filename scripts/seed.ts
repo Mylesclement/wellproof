@@ -2,6 +2,7 @@
 // Run with: npm run db:reset   (wipes the local DB, applies migrations, then runs this)
 
 import { createClient } from "@supabase/supabase-js";
+import { syncFlags } from "../src/lib/flags";
 import { SAMPLE_POINTS, SAMPLE_STEPS, sampleDays, type PointKey } from "../src/lib/sample-data";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -141,7 +142,28 @@ async function main() {
     "grant",
   );
 
-  console.log(`Seeded Sample Field A: ${rows.length} readings over ${days.length} days, 1 correction.`);
+  // Work out the flags, then pre-explain one so the demo shows both states.
+  await syncFlags(db, field.id);
+  const firstStep = must(await db.from("steps").select("id").eq("from_point_id", pointId.well).single(), "first step");
+  const meterFlag = must(
+    await db.from("flags").select("id").eq("field_id", field.id).eq("flag_date", days[10].date).eq("step_id", firstStep.id).single(),
+    "meter drift flag",
+  );
+  must(
+    await db
+      .from("flag_notes")
+      .insert({
+        flag_id: meterFlag.id,
+        body: "Flow station meter due for proving. Calibration crew booked for the following week.",
+        created_by: adminId,
+      })
+      .select(),
+    "note",
+  );
+  must(await db.from("flags").update({ status: "explained" }).eq("id", meterFlag.id).select(), "explain flag");
+  const { count } = await db.from("flags").select("id", { count: "exact", head: true }).eq("field_id", field.id);
+
+  console.log(`Seeded Sample Field A: ${rows.length} readings over ${days.length} days, 1 correction, ${count} flags (1 explained).`);
   console.log(`Demo logins (password "${DEMO_PASSWORD}"):`);
   console.log("  admin@sample-operator.example   operator admin");
   console.log("  staff@sample-operator.example   operator staff");

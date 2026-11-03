@@ -73,6 +73,6 @@ Changes from the starting data model in the handoff: added `profiles`, `fields.i
 ## Status
 
 - [x] Repo, stack, auth, schema, seed data, operator readings screen
-- [ ] Operator flow: fields, points, steps, daily entry, CSV upload
-- [ ] Reconciliation engine with tests, flags, explanations, trust score
+- [ ] Operator flow: daily entry and corrections done; field setup screen, audit log screen, CSV upload to do
+- [x] Reconciliation engine with tests, flags, explanations, trust score
 - [ ] Lender invites, lender view, export, deploy
