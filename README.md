@@ -6,6 +6,10 @@ Operators log daily volumes at each measurement point (wellhead, flow station, t
 
 **All data in this repo is invented sample data.** No real operator figures, names, or anything under NDA.
 
+## Put it online
+
+See [DEPLOY.md](DEPLOY.md).
+
 ## Run it locally
 
 You need Node 22 and Docker.

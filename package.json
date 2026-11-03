@@ -11,7 +11,9 @@
     "db:start": "supabase start -x studio,imgproxy,edge-runtime,logflare,vector,realtime,storage-api,postgres-meta,supavisor",
     "db:reset": "supabase db reset && npm run seed",
     "test": "vitest run",
-    "check:access": "tsx --env-file=.env.local scripts/check-access.mts"
+    "check:access": "tsx --env-file=.env.local scripts/check-access.mts",
+    "seed:sql": "tsx scripts/seed-sql.ts",
+    "deploy:sql": "npm run -s seed:sql && cat supabase/migrations/*.sql > deploy/schema.sql && echo 'Wrote deploy/schema.sql'"
   },
   "dependencies": {
     "@fontsource-variable/archivo": "^5.3.0",
