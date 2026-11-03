@@ -39,3 +39,11 @@ try {
   // The check writes one test reading per operator role; that is expected and
   // shows up in the audit log. `npm run db:reset` clears it.
 }
+
+// Public form submissions: anyone can send one, nobody can read them back.
+{
+  const visitor = createClient(url, anon, { auth: { persistSession: false } });
+  const read = await visitor.from("inquiries").select("id");
+  const { count } = await admin.from("inquiries").select("id", { count: "exact", head: true });
+  console.log(`public visitor reading inquiries: sees ${read.data?.length ?? 0} of ${count} rows`);
+}

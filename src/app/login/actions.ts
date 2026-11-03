@@ -10,5 +10,5 @@ export async function signIn(_prev: string | null, form: FormData): Promise<stri
     password: String(form.get("password") ?? ""),
   });
   if (error) return "That email and password did not match.";
-  redirect("/");
+  redirect("/fields");
 }

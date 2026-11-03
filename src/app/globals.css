@@ -31,9 +31,9 @@
   --color-warn-soft: var(--warn-soft);
   --color-bad: var(--bad);
   --color-bad-soft: var(--bad-soft);
-  --font-display: var(--font-archivo), system-ui, sans-serif;
-  --font-sans: var(--font-source-sans), system-ui, sans-serif;
-  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+  --font-display: "Archivo Variable", system-ui, sans-serif;
+  --font-sans: "Source Sans 3 Variable", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
 }
 
 body {

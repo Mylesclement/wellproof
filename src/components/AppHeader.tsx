@@ -14,7 +14,7 @@ export function Brand() {
 export function AppHeader({ name, org }: { name: string; org?: { name: string; role: Role } }) {
   return (
     <header className="flex flex-wrap items-center justify-between gap-x-5 gap-y-2">
-      <Link href="/" aria-label="Home">
+      <Link href="/fields" aria-label="Your fields">
         <Brand />
       </Link>
       <div className="flex items-center gap-4 text-sm">
