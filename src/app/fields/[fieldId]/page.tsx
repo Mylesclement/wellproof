@@ -1,7 +1,9 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AppHeader, SampleBanner } from "@/components/AppHeader";
-import { fmtBbl, fmtDay, fmtStamp } from "@/lib/format";
+import { fmtBbl, fmtDay, fmtStamp, todayInField } from "@/lib/format";
 import { getViewer } from "@/lib/viewer";
+import { DayForm } from "./DayForm";
 
 type Reading = {
   id: string;
@@ -15,8 +17,15 @@ type Reading = {
   created_at: string;
 };
 
-export default async function FieldPage({ params }: { params: Promise<{ fieldId: string }> }) {
+export default async function FieldPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ fieldId: string }>;
+  searchParams: Promise<{ day?: string }>;
+}) {
   const { fieldId } = await params;
+  const { day: requestedDay } = await searchParams;
   const { supabase, name, orgs } = await getViewer();
 
   const { data: field } = await supabase
@@ -60,6 +69,22 @@ export default async function FieldPage({ params }: { params: Promise<{ fieldId:
   const days = [...byDay.keys()].sort().reverse();
   const pointName = (id: string) => points?.find((p) => p.id === id)?.name ?? "Unknown point";
   const myOrg = orgs.find((o) => o.id === field.operator_org_id) ?? orgs[0];
+  // Hiding the form is only for clarity. The database refuses a lender's
+  // write regardless (see npm run check:access).
+  const canWrite = orgs.some((o) => o.id === field.operator_org_id && o.role !== "lender_viewer");
+
+  // Which day the entry form shows: the one asked for in the URL, otherwise
+  // the day after the latest reading, never later than today.
+  const today = todayInField();
+  let entryDay = today;
+  if (requestedDay && /^\d{4}-\d{2}-\d{2}$/.test(requestedDay) && requestedDay <= today) {
+    entryDay = requestedDay;
+  } else if (days.length) {
+    const next = new Date(days[0] + "T00:00:00Z");
+    next.setUTCDate(next.getUTCDate() + 1);
+    entryDay = next.toISOString().slice(0, 10) < today ? next.toISOString().slice(0, 10) : today;
+  }
+  const entryCurrent = Object.fromEntries([...(byDay.get(entryDay)?.values() ?? [])].map((r) => [r.point_id, Number(r.volume_bbl)]));
 
   return (
     <main className="max-w-[1080px] mx-auto px-4 pt-5 pb-12 flex flex-col gap-5">
@@ -99,8 +124,32 @@ export default async function FieldPage({ params }: { params: Promise<{ fieldId:
           </ol>
         </div>
 
+        {canWrite && points && (
+          <div className="panel" id="entry">
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <h3 className="font-display font-bold">Enter or correct readings</h3>
+                <p className="text-sm text-muted">
+                  {Object.keys(entryCurrent).length
+                    ? `${fmtDay(entryDay)} already has readings. Fill a blank box for a late report, or change a number to correct it.`
+                    : `No readings on file for ${fmtDay(entryDay)} yet.`}
+                </p>
+              </div>
+              <form method="get" className="flex items-end gap-2">
+                <label className="flex flex-col gap-1 text-sm font-semibold">
+                  Date
+                  <input className="input" type="date" name="day" defaultValue={entryDay} max={today} />
+                </label>
+                <button className="btn bg-transparent text-accent border border-accent">Go</button>
+              </form>
+            </div>
+            <DayForm key={entryDay} fieldId={field.id} date={entryDay} points={points} current={entryCurrent} />
+          </div>
+        )}
+
         <div className="panel">
           <h3 className="font-display font-bold">Readings on file</h3>
+          {canWrite && <p className="text-sm text-muted">Click a date to correct it or add a late report.</p>}
           <div className="overflow-x-auto">
             <table className="data-table">
               <thead>
@@ -114,7 +163,15 @@ export default async function FieldPage({ params }: { params: Promise<{ fieldId:
               <tbody>
                 {days.map((day) => (
                   <tr key={day}>
-                    <td>{fmtDay(day)}</td>
+                    <td>
+                      {canWrite ? (
+                        <Link href={`?day=${day}#entry`} className="text-accent font-semibold hover:underline">
+                          {fmtDay(day)}
+                        </Link>
+                      ) : (
+                        fmtDay(day)
+                      )}
+                    </td>
                     {points?.map((p) => {
                       const r = byDay.get(day)?.get(p.id);
                       if (!r) return <td key={p.id} className="text-muted">Not reported</td>;

@@ -7,3 +7,7 @@ export const fmtDay = (iso: string) =>
 
 export const fmtStamp = (iso: string) =>
   new Date(iso).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "UTC" }) + " UTC";
+
+// "Today" for a field. All v1 fields are in Nigeria, so use Lagos time; a
+// reading for today becomes possible at midnight there, not midnight UTC.
+export const todayInField = (timeZone = "Africa/Lagos") => new Date().toLocaleDateString("en-CA", { timeZone });
